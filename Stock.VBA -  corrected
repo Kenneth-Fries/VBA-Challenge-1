@@ -1,0 +1,144 @@
+Sub Stocks()
+Sub Stocks()
+    
+    
+    'For Each ws In Worksheets   'Had to prepend "ws." to every function that refers to cells, like Cells() or Range()
+        Dim WorksheetName As String
+        'WorksheetName = ws.Name   'Don't actually need this
+        
+        'Sheets(ws.Name).Select    'Dont actually need this.  The For Each above ould take care of each sheet.
+        Dim DateMinOpen As Variant
+        Dim DateMaxClose As Variant
+        Dim i As Double
+        
+        Dim x As Double
+        
+        Cells(1, 9).Value = "Ticker"
+        Cells(1, 10).Value = "Yearly Change"
+        Cells(1, 11).Value = "Percent Change"
+        Cells(1, 12).Value = "Total Stock Volume"
+        Cells(2, 15).Value = "Greatest % Increase"
+        Cells(3, 15).Value = "Greatest % Decrease"
+        Cells(4, 15).Value = "Greatest Total Volume"
+        Cells(1, 16).Value = "Ticker"
+        Cells(1, 17).Value = "Volume"
+        x = 2
+        i = 2
+        
+        Cells(x, 9).Value = Cells(x, 1).Value
+        
+        DateMinOpen = Cells(i, 3).Value
+        
+        LastRow = Cells(Rows.Count, 1).End(xlUp).Row
+        
+        For i = 2 To LastRow
+            
+            TotalV = TotalV + Cells(i, 7).Value  ' Moved from below becaiuse this has to happen every row, including the last row of the company.
+                
+            
+            ' cells during the year
+            If Cells(i, 1).Value = Cells(x, 9).Value Then
+                'TotalV = TotalV + Cells(i, 7).Value
+                DateMaxClose = Cells(i, 6).Value
+            Else      ' Last cell of company
+                Cells(x, 10).Value = DateMaxClose - DateMinOpen
+                
+                If DateMinOpen <= 0 Then           '  Denomenator, not numerator.     If DateMaxClose <= 0 Then
+                    Cells(x, 11).Value = 0
+                Else
+                    
+                    Cells(x, 11).Value = (DateMaxClose / DateMinOpen) - 1
+                    
+                End If
+            
+                Cells(x, 11).Style = "Percent"
+                
+                'highlight cells
+                If Cells(x, 10).Value >= 0 Then
+                    Cells(x, 10).Interior.ColorIndex = 4
+                Else
+                    Cells(x, 10).Interior.ColorIndex = 3
+                End If
+                
+                
+                'write total volume
+                Cells(x, 12).Value = TotalV
+                
+                
+                'prepare for next company
+                DateMinOpen = Cells(i, 3).Value
+                TotalV = Cells(i, 7).Value
+                x = x + 1
+                Cells(x, 9).Value = Cells(i, 1).Value
+            
+            End If
+        
+        Next i
+        
+        ' Year Change
+        Cells(x, 10).Value = DateMaxClose - DateMinOpen
+        
+        If DateMaxClose <= 0 Then ' This was again meant to be DateMinOpen?
+            Cells(x, 11).Value = 0
+        Else
+            Cells(x, 11).Value = (DateMaxClose / DateMinOpen) - 1
+        End If
+        
+        Cells(x, 11).Style = "Percent"
+        
+        
+        'Highlighting cells a second time?
+        If Cells(x, 10).Value >= 0 Then
+            Cells(x, 10).Interior.ColorIndex = 4
+        Else
+            Cells(x, 10).Interior.ColorIndex = 3
+        End If
+        
+        
+        'write Total Volume
+        Cells(x, 12).Value = TotalV
+        
+        'initiate Greatest Volume Decrease?
+        Volume_Greatest_Decrease = 100000    'find a way to initiate it with the first value, not an arbitrary one.
+        Ticker_Greatest_Decrease = 100000    'Sometimes this might work if 0 was a starting point for going up or down
+        
+        'find last row of summary table
+        LastRow = Cells(Rows.Count, 9).End(xlUp).Row
+        
+        For x = 2 To LastRow  'reading Table Rows
+            
+            'looking for Greatest Increase
+            If Cells(x, 11).Value > Volume_Greatest_Increase Then
+                Ticker_Greatest_Increase = Cells(x, 9).Value
+                Volume_Greatest_Increase = Cells(x, 11).Value
+            End If
+            
+            'looking for Greatest decrease
+            If Cells(x, 11).Value < Volume_Greatest_Decrease Then
+                Ticker_Greatest_Decrease = Cells(x, 9).Value
+                Volume_Greatest_Decrease = Cells(x, 11).Value
+            End If
+            
+            'looking for greatest volume
+            If Cells(x, 12).Value > Volume_Greatest_Total_Volume Then
+                Ticker_Greatest_Total_Volume = Cells(x, 9).Value
+                Volume_Greatest_Total_Volume = Cells(x, 12).Value
+            End If
+            
+        Next x  'Table Row
+        
+        'Write Challenge table
+        Cells(2, 16).Value = Ticker_Greatest_Increase
+        Cells(2, 17).Value = Volume_Greatest_Increase
+        Cells(2, 17).Style = "Percent"
+        Cells(3, 16).Value = Ticker_Greatest_Decrease
+        Cells(3, 17).Value = Volume_Greatest_Decrease
+        Cells(3, 17).Style = "Percent"
+        Cells(4, 16).Value = Ticker_Greatest_Total_Volume
+        Cells(4, 17).Value = Volume_Greatest_Total_Volume
+        Cells(1, 1).Select
+        
+        
+    'Next ws    ' This works if you put ws. ahead of every Cells() or Range() reference
+
+End Sub 'Stocks
